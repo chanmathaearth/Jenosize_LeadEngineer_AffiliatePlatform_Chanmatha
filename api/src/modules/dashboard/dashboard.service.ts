@@ -3,66 +3,79 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class DashboardService {
-    constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
-    async getSummary() {
-        const totalClicks = await this.prisma.click.count();
+  async getSummary() {
+    const totalClicks = await this.prisma.click.count();
 
-        // 🔥 ดึงเฉพาะ link + relation (ไม่เอา click)
-        const links = await this.prisma.link.findMany({
-            include: {
-                product: true,
-                campaign: true,
-            },
-        });
+    const clicksByCampaign = await this.prisma.$queryRaw<
+      {
+        campaign_id: number;
+        campaign_name: string;
+        clicks: bigint;
+      }[]
+    >`
+      SELECT 
+        l.campaign_id,
+        c.name AS campaign_name,
+        COUNT(cl.id) AS clicks
+      FROM "Click" cl
+      JOIN "Link" l ON cl.link_id = l.id
+      JOIN "Campaign" c ON l.campaign_id = c.id
+      WHERE c.utm_campaign != 'organic'
+      GROUP BY l.campaign_id, c.name
+      ORDER BY clicks DESC
+    `;
 
-        // 🔥 group click ใน DB แทน
-        const clickCounts = await this.prisma.click.groupBy({
-            by: ['link_id'],
-            _count: true,
-        });
+    const clicksByProduct = await this.prisma.$queryRaw<
+      {
+        product_id: number;
+        product_title: string;
+        clicks: bigint;
+      }[]
+    >`
+      SELECT 
+        l.product_id,
+        p.title AS product_title,
+        COUNT(cl.id) AS clicks
+      FROM "Click" cl
+      JOIN "Link" l ON cl.link_id = l.id
+      JOIN "Product" p ON l.product_id = p.id
+      GROUP BY l.product_id, p.title
+      ORDER BY clicks DESC
+    `;
 
-        // map link_id → count
-        const clickMap = new Map<number, number>();
-        clickCounts.forEach((c) => {
-            clickMap.set(c.link_id, c._count);
-        });
+    const clicksByMarketplace = await this.prisma.$queryRaw<
+      {
+        marketplace: string;
+        clicks: bigint;
+      }[]
+    >`
+      SELECT 
+        l.marketplace,
+        COUNT(cl.id) AS clicks
+      FROM "Click" cl
+      JOIN "Link" l ON cl.link_id = l.id
+      GROUP BY l.marketplace
+      ORDER BY clicks DESC
+    `;
 
-        const clicksByCampaign = links
-            .filter((link) => link.campaign.utm_campaign !== 'organic')
-            .map((link) => ({
-                campaign_id: link.campaign_id,
-                campaign_name: link.campaign.name,
-                clicks: clickMap.get(link.id) || 0,
-            }));
-
-        const productMap = new Map<number, any>();
-        const marketplaceMap = new Map<string, number>();
-
-        for (const link of links) {
-            const clickCount = clickMap.get(link.id) || 0;
-
-            productMap.set(link.product_id, {
-                product_title: link.product.title,
-                clicks: (productMap.get(link.product_id)?.clicks || 0) + clickCount,
-            });
-
-            marketplaceMap.set(
-                link.marketplace,
-                (marketplaceMap.get(link.marketplace) || 0) + clickCount,
-            );
-        }
-
-        return {
-            total_clicks: totalClicks,
-            clicks_by_campaign: clicksByCampaign,
-            clicks_by_product: Array.from(productMap.values()),
-            clicks_by_marketplace: Array.from(marketplaceMap.entries()).map(
-                ([marketplace, clicks]) => ({
-                    marketplace,
-                    clicks,
-                }),
-            ),
-        };
-    }
+    return {
+      total_clicks: totalClicks,
+      clicks_by_campaign: clicksByCampaign.map((item) => ({
+        campaign_id: item.campaign_id,
+        campaign_name: item.campaign_name,
+        clicks: Number(item.clicks),
+      })),
+      clicks_by_product: clicksByProduct.map((item) => ({
+        product_id: item.product_id,
+        product_title: item.product_title,
+        clicks: Number(item.clicks),
+      })),
+      clicks_by_marketplace: clicksByMarketplace.map((item) => ({
+        marketplace: item.marketplace,
+        clicks: Number(item.clicks),
+      })),
+    };
+  }
 }
