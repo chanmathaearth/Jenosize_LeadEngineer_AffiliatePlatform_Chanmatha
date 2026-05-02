@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  title     String
+  image_url String
+  offers    Offer[]
+  links     Link[]
+}
+
+model Offer {
+  id                Int      @id @default(autoincrement())
+  product           Product  @relation(fields: [product_id], references: [id])
+  product_id        Int
+  marketplace       String
+  store_name        String
+  url               String
+  price             Float
+  last_checked_at   DateTime @default(now())
+}
+
+model Campaign {
+  id           Int      @id @default(autoincrement())
+  name         String
+  utm_campaign String
+  start_at     DateTime
+  end_at       DateTime
+
+  links        Link[]
+}
+
+model Link {
+  id          Int      @id @default(autoincrement())
+  product    Product  @relation(fields: [product_id], references: [id])
+  product_id Int
+  marketplace String
+  campaign    Campaign @relation(fields: [campaign_id], references: [id])
+  campaign_id Int
+
+  short_code  String   @unique
+  target_url  String
+  click       Click[]
+  @@unique([product_id, campaign_id, marketplace])
+}
+
+model Click {
+  id        Int      @id @default(autoincrement())
+  link_id   Int
+  link      Link     @relation(fields: [link_id], references: [id])
+  created_at DateTime @default(now())
+}
