@@ -20,14 +20,14 @@ model Product {
 }
 
 model Offer {
-  id                Int      @id @default(autoincrement())
-  product           Product  @relation(fields: [product_id], references: [id])
-  product_id        Int
-  marketplace       String
-  store_name        String
-  url               String
-  price             Float
-  last_checked_at   DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  product         Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product_id      Int
+  marketplace     String
+  store_name      String
+  url             String
+  price           Float
+  last_checked_at DateTime @default(now())
 }
 
 model Campaign {
@@ -42,21 +42,23 @@ model Campaign {
 
 model Link {
   id          Int      @id @default(autoincrement())
-  product    Product  @relation(fields: [product_id], references: [id])
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
   product_id Int
   marketplace String
-  campaign    Campaign @relation(fields: [campaign_id], references: [id])
+
+  campaign    Campaign @relation(fields: [campaign_id], references: [id], onDelete: Cascade)
   campaign_id Int
 
-  short_code  String   @unique
+  short_code  String @unique
   target_url  String
   click       Click[]
+
   @@unique([product_id, campaign_id, marketplace])
 }
 
 model Click {
-  id        Int      @id @default(autoincrement())
-  link_id   Int
-  link      Link     @relation(fields: [link_id], references: [id])
+  id         Int      @id @default(autoincrement())
+  link_id    Int
+  link       Link     @relation(fields: [link_id], references: [id], onDelete: Cascade)
   created_at DateTime @default(now())
 }

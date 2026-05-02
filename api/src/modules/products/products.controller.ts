@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
 import { ProductResponseDto } from './dto/product-response.dto';
@@ -25,5 +25,11 @@ export class ProductsController {
   @ApiOperation({ summary: 'Create Prodcut' })
   create(@Body() dto: CreateProductDto): Promise<ProductResponseDto> {
     return this.productsService.create(dto);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Remove Product' })
+  remove(@Param('id') id: string) {
+    return this.productsService.remove(Number(id));
   }
 }

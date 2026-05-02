@@ -71,4 +71,10 @@ export class ProductsService {
       best_price: Math.min(...product.offers.map((offer) => offer.price)),
     };
   }
+
+  async remove(id: number) {
+  return this.prisma.product.delete({
+    where: { id },
+  });
+}
 }
