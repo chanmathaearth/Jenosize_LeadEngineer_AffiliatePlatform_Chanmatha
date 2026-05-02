@@ -8,6 +8,6 @@ export interface Link {
 }
 
 export interface CreateLinkDto {
-  product_id: string;
-  campaign_id: string;
+  product_id: number;
+  campaign_id: number;
 }

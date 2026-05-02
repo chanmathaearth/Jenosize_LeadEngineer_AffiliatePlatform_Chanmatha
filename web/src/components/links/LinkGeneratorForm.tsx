@@ -14,6 +14,13 @@ export function LinkGeneratorForm() {
   const { data: campaigns } = useCampaigns()
   const createLinks = useCreateLinks()
 
+  const isLinkAlreadyGenerated = Boolean(
+    productId && 
+    campaignId && 
+    products?.find(p => p.id.toString() === productId)
+      ?.links?.some(link => link.campaign_id.toString() === campaignId)
+  )
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -23,7 +30,7 @@ export function LinkGeneratorForm() {
     }
 
     createLinks.mutate(
-      { product_id: productId, campaign_id: campaignId },
+      { product_id: Number(productId), campaign_id: Number(campaignId) },
       {
         onSuccess: () => {
           showSuccess("Links Generated", "Short links have been successfully generated for all offers.")
@@ -73,13 +80,18 @@ export function LinkGeneratorForm() {
         </div>
       </div>
       
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex justify-end items-center gap-4">
+        {isLinkAlreadyGenerated && (
+          <span className="text-sm text-red-500 font-medium">
+            This product already has links for the selected campaign.
+          </span>
+        )}
         <button
           type="submit"
-          disabled={createLinks.isPending}
+          disabled={createLinks.isPending || isLinkAlreadyGenerated || !productId || !campaignId}
           className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 focus:ring-4 focus:ring-blue-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createLinks.isPending ? "Generating..." : "Generate Links"}
+          {createLinks.isPending ? "Generating..." : isLinkAlreadyGenerated ? "Already Generated" : "Generate Links"}
         </button>
       </div>
     </form>

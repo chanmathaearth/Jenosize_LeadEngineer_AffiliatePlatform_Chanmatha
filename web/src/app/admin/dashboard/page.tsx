@@ -14,6 +14,8 @@ export default function AdminDashboardPage() {
   if (error) return <ErrorMessage message="Failed to load dashboard data." />
   if (!stats) return null
 
+  console.log(stats)
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
@@ -35,7 +37,7 @@ export default function AdminDashboardPage() {
           title="Clicks by Product"
           data={stats.clicks_by_product}
           columns={[
-            { key: "product_name", label: "Product" },
+            { key: "product_title", label: "Product" },
             { key: "clicks", label: "Clicks" }
           ]}
         />

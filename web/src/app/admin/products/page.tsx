@@ -1,14 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { useProducts, useCreateProduct } from "@/features/products/hooks"
+import { useProducts, useCreateProduct, useDeleteProduct } from "@/features/products/hooks"
 import { showSuccess, showError } from "@/lib/alert"
 import { Loading } from "@/components/common/Loading"
+import { Trash2 } from "lucide-react"
+import Swal from "sweetalert2"
 
 export default function AdminProductsPage() {
   const [sourceUrl, setSourceUrl] = useState("")
   const { data: products, isLoading } = useProducts()
   const createProduct = useCreateProduct()
+  const deleteProduct = useDeleteProduct()
 
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,6 +25,29 @@ export default function AdminProductsPage() {
       },
       onError: (error: any) => {
         showError("Error", error.message || "Failed to add product")
+      }
+    })
+  }
+
+  const handleDeleteProduct = (id: string, title: string) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: `Do you want to remove "${title}"? This will also remove its offers and links.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteProduct.mutate(id, {
+          onSuccess: () => {
+            showSuccess("Deleted!", "Product has been removed successfully.")
+          },
+          onError: (error: any) => {
+            showError("Error", error.message || "Failed to delete product.")
+          }
+        })
       }
     })
   }
@@ -65,7 +91,7 @@ export default function AdminProductsPage() {
               <li key={product.id} className="p-4 sm:p-6 flex items-center gap-4 hover:bg-gray-50 transition-colors">
                 <div className="h-16 w-16 flex-shrink-0 rounded-md bg-gray-100 overflow-hidden">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={product.image} alt={product.title} className="h-full w-full object-cover" />
+                  <img src={product.image_url} alt={product.title} className="h-full w-full object-cover" />
                 </div>
                 <div className="flex-grow min-w-0">
                   <h4 className="text-base font-semibold text-gray-900 truncate">{product.title}</h4>
@@ -76,6 +102,16 @@ export default function AdminProductsPage() {
                       </span>
                     ))}
                   </div>
+                </div>
+                <div className="flex-shrink-0">
+                  <button
+                    onClick={() => handleDeleteProduct(product.id, product.title)}
+                    disabled={deleteProduct.isPending && deleteProduct.variables === product.id}
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    title="Delete product"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
                 </div>
               </li>
             ))}

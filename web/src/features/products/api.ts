@@ -8,3 +8,8 @@ export const createProduct = (source_url: string) =>
     method: "POST",
     body: JSON.stringify({ source_url }),
   })
+
+export const deleteProduct = (id: string | number) =>
+  apiClient<void>(`/api/products/${id}`, {
+    method: "DELETE",
+  })

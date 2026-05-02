@@ -10,7 +10,9 @@ export interface Offer {
 export interface Product {
   id: string;
   title: string;
-  image: string;
+  image_url: string;
   source_url: string;
   offers: Offer[];
+  links?: { marketplace: string; short_code: string; campaign_id: number }[];
+  best_price: number;
 }
