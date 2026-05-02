@@ -19,7 +19,9 @@ async function bootstrap() {
       transform: true, // auto-transform payloads to DTO class instances
     }),
   );
-
+  app.enableCors({
+    origin: true,
+  });
   // Swagger setup
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Products API')
