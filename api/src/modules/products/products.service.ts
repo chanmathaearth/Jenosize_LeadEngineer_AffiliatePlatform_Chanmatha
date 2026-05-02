@@ -12,6 +12,7 @@ export class ProductsService {
     const products = await this.prisma.product.findMany({
       include: {
         offers: true,
+        links: true,
       },
     });
 
@@ -20,6 +21,7 @@ export class ProductsService {
       title: product.title,
       image_url: product.image_url,
       offers: product.offers,
+      links: product.links,
       best_price: Math.min(...product.offers.map((offer) => offer.price)),
     }));
   }
