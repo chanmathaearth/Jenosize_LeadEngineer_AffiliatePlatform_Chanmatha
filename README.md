@@ -3,7 +3,7 @@
 An affiliate comparison platform built with modern web technologies, consisting of a strongly-typed backend (NestJS + Prisma) and a performant, reactive frontend (Next.js + React Query).
 
 ## Demo & Access
-- **Demo URL**: https://yourapp.vercel.app
+- **Demo URL**: https://affiliate-platform-chanmatha.vercel.app/
 - **Admin Access**: `/admin` (Use this path to access the admin dashboard to manage products, offers, campaigns, and generated links)
 
 ## Architecture Overview
@@ -91,11 +91,39 @@ graph TD
    ```
    *The web app will be available at `http://localhost:3001` (or your configured port).*
 
+## How to Use
+
+### 1. Add a Product
+- Go to `/admin/products`
+- Enter a product URL (e.g., iPhone, AirPods)
+- The system will fetch mock data and display price comparison
+
+### 2. Create a Campaign
+- Go to `/admin/campaigns`
+- Create a campaign with name and date range
+
+### 3. Generate Affiliate Links
+- Go to `/admin/links`
+- Select a product and campaign
+- Click "Generate Links" to create short affiliate links
+
+### 4. User Flow (Landing Page)
+- On the homepage, select a campaign
+- View products with price comparison
+- Click "Buy Now" → system redirects via `/go/:shortCode` and tracks click
+
+### 5. View Analytics
+- Go to `/admin/dashboard`
+- View total clicks and breakdown by product, campaign, and marketplace
+
+
 ## Future Roadmap: What to Improve with More Time
 
-1. **Authentication & Authorization**: Implement robust secure login (e.g., using NextAuth.js on the frontend and JWT Guards in NestJS) to protect the `/admin` routes so only authorized users can modify products and campaigns.
-2. **Analytics Dashboard**: Build comprehensive charts and visual metrics in the admin panel to track clicks, conversion rates, and revenue per campaign.
-3. **Caching Layer**: Integrate Redis to cache frequent API responses (like the main product list and offers) to reduce database load during high traffic spikes.
-4. **Automated Testing**: Expand test coverage by adding more end-to-end (E2E) tests with Playwright/Cypress for the UI, and unit/integration tests with Jest for critical backend business logic.
-5. **SEO & Performance Enhancements**: Implement Dynamic Open Graph images, richer structured data (JSON-LD), and server-side generated pages for individual products to improve search engine rankings.
-6. **Docker Orchestration**: Create a comprehensive `docker-compose.yml` to orchestrate the Next.js app, the NestJS API, and the PostgreSQL database for single-command setup and easier deployment.
+1. **Authentication System**  
+   Add secure login (e.g., JWT / NextAuth) to protect admin routes and restrict access.
+
+2. **Analytics Dashboard Improvements**  
+   Enhance the dashboard with clearer charts and insights (click trends, campaign performance).
+
+3. **Real Data Integration**  
+   Replace mock product data with real marketplace APIs or scraping adapters.
